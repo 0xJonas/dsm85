@@ -1,0 +1,8 @@
+x86/
+x64/
+.vs/
+[Dd]ebug/
+[Rr]elease/
+
+out.lst
+rom.bin
