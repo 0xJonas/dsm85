@@ -1,5 +1,5 @@
-#ifndef _UTIL
-#define _UTIL
+#ifndef __UTIL
+#define __UTIL
 
 #include <string>
 

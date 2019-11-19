@@ -1,5 +1,5 @@
-#ifndef _ARGUMENT_PARSER
-#define _ARGUMENT_PARSER
+#ifndef __ARGUMENT_PARSER
+#define __ARGUMENT_PARSER
 
 #include <string>
 #include <map>
