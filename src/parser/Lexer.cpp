@@ -130,7 +130,7 @@ enum states {
 	if(peek==c) \
 		state+=NUM_STATES; \
 	else if(is_whitespace(peek)) \
-		return IDENTIFIER_T; \
+		return IDENTIFIER; \
 	else \
 		state=S_IDENTIFIER; \
 		return PUSH;
@@ -185,7 +185,7 @@ int Lexer::process_character(char peek) {
 			return SKIP;
 	case S_IDENTIFIER:
 		if (!is_valid_identifier_body(peek))
-			return IDENTIFIER_T;
+			return IDENTIFIER;
 		else
 			return PUSH;
 	case S_LITERAL:
@@ -193,7 +193,7 @@ int Lexer::process_character(char peek) {
 		if (is_valid_literal_body(peek))
 			return PUSH;
 		else
-			return LITERAL_T;
+			return LITERAL;
 	case S_STRING:
 		if (peek == '\\') {
 			state = S_STRING_MASK;
@@ -209,32 +209,32 @@ int Lexer::process_character(char peek) {
 		//TODO add special characters e.g. newline, tab
 		state = S_STRING;
 		return PUSH;
-	case S_STRING_COMPLETE: return STRING_T;
-	case S_NEWLINE: return NEWLINE_T;
+	case S_STRING_COMPLETE: return STRING;
+	case S_NEWLINE: return NEWLINE;
 	case S_RANGE:
 		if (peek == '.') {
 			state = S_RANGE_CONT;
 			return PUSH;
 		}
 		else
-			return ERROR_T;
-	case S_RANGE_CONT: return RANGE_T;
-	case S_ADD: return ADD_T;
-	case S_SUBTRACT: return SUBTRACT_T;
-	case S_MULTIPLY: return MULTIPLY_T;
-	case S_DIVIDE: return DIVIDE_T;
+			return ERROR;
+	case S_RANGE_CONT: return RANGE;
+	case S_ADD: return ADD;
+	case S_SUBTRACT: return SUBTRACT;
+	case S_MULTIPLY: return MULTIPLY;
+	case S_DIVIDE: return DIVIDE;
 	case S_MODULO:
 		if (is_whitespace(peek))
-			return MODULO_T;
+			return MODULO;
 		else {
 			state = S_LITERAL;
 			return PUSH;
 		}
-	case S_LEFT_PARENTHESES: return LEFT_PARENTHESES_T;
-	case S_RIGHT_PARENTHESES: return RIGHT_PARENTHESES_T;
-	case S_LEFT_BRACKET: return LEFT_BRACKET_T;
-	case S_RIGHT_BRACKET: return RIGHT_BRACKET_T;
-	case S_EOI: return EOI_T;
+	case S_LEFT_PARENTHESES: return LEFT_PARENTHESES;
+	case S_RIGHT_PARENTHESES: return RIGHT_PARENTHESES;
+	case S_LEFT_BRACKET: return LEFT_BRACKET;
+	case S_RIGHT_BRACKET: return RIGHT_BRACKET;
+	case S_EOI: return EOI;
 
 	case MATCHED_UP_TO(S_BYTES, 0): MATCH('y')
 	case MATCHED_UP_TO(S_BYTES, 1): MATCH('t')
@@ -242,7 +242,7 @@ int Lexer::process_character(char peek) {
 	case MATCHED_UP_TO(S_BYTES, 3): MATCH('s')
 	case MATCHED_UP_TO(S_BYTES, 4):
 		if (is_whitespace(peek))
-			return BYTES_T;
+			return BYTES;
 		else {
 			state = S_IDENTIFIER;
 			return PUSH;
@@ -260,7 +260,7 @@ int Lexer::process_character(char peek) {
 	case MATCHED_UP_TO(S_CODE, 2): MATCH('e')
 	case MATCHED_UP_TO(S_CODE, 3):
 		if(is_whitespace(peek))
-			return CODE_T;
+			return CODE;
 		else {
 			state = S_IDENTIFIER;
 			return PUSH;
@@ -272,7 +272,7 @@ int Lexer::process_character(char peek) {
 	case MATCHED_UP_TO(S_COMMENTS, 5): MATCH('t')
 	case MATCHED_UP_TO(S_COMMENTS, 6): MATCH('s')
 	case MATCHED_UP_TO(S_COMMENTS, 7): MATCH(':')
-	case MATCHED_UP_TO(S_COMMENTS, 8): return COMMENTS_T;
+	case MATCHED_UP_TO(S_COMMENTS, 8): return COMMENTS;
 
 	case MATCHED_UP_TO(S_DWORDS, 0): MATCH('w')
 	case MATCHED_UP_TO(S_DWORDS, 1): MATCH('o')
@@ -285,7 +285,7 @@ int Lexer::process_character(char peek) {
 			return PUSH;
 		}
 		else if(is_whitespace(peek))
-			return DWORDS_T;
+			return DWORDS;
 		else {
 			state = S_IDENTIFIER;
 			return PUSH;
@@ -296,14 +296,14 @@ int Lexer::process_character(char peek) {
 		else if (peek == 'l')
 			state = MATCHED_UP_TO(S_DWORDS_LE, 7);
 		else if (is_whitespace(peek))
-			return IDENTIFIER_T;
+			return IDENTIFIER;
 		else
 			state = S_IDENTIFIER;
 		return PUSH;
 	case MATCHED_UP_TO(S_DWORDS_BE, 7): MATCH('e')
 	case MATCHED_UP_TO(S_DWORDS_BE, 8):
 		if (is_whitespace(peek))
-			return DWORDS_BE_T;
+			return DWORDS_BE;
 		else{
 			state = S_IDENTIFIER;
 			return PUSH;
@@ -311,7 +311,7 @@ int Lexer::process_character(char peek) {
 	case MATCHED_UP_TO(S_DWORDS_LE, 7): MATCH('e')
 	case MATCHED_UP_TO(S_DWORDS_LE, 8):
 		if (is_whitespace(peek))
-			return DWORDS_LE_T;
+			return DWORDS_LE;
 		else {
 			state = S_IDENTIFIER;
 			return PUSH;
@@ -324,7 +324,7 @@ int Lexer::process_character(char peek) {
 	case MATCHED_UP_TO(S_INCLUDE, 4): MATCH('d')
 	case MATCHED_UP_TO(S_INCLUDE, 5): MATCH('e')
 	case MATCHED_UP_TO(S_INCLUDE, 6): MATCH(':')
-	case MATCHED_UP_TO(S_INCLUDE, 7): return INCLUDE_T;
+	case MATCHED_UP_TO(S_INCLUDE, 7): return INCLUDE;
 
 	case MATCHED_UP_TO(S_LABELS, 0): MATCH('a')
 	case MATCHED_UP_TO(S_LABELS, 1): MATCH('b')
@@ -332,7 +332,7 @@ int Lexer::process_character(char peek) {
 	case MATCHED_UP_TO(S_LABELS, 3): MATCH('l')
 	case MATCHED_UP_TO(S_LABELS, 4): MATCH('s')
 	case MATCHED_UP_TO(S_LABELS, 5): MATCH(':')
-	case MATCHED_UP_TO(S_LABELS, 6): return LABELS_T;
+	case MATCHED_UP_TO(S_LABELS, 6): return LABELS;
 
 	case MATCHED_UP_TO(S_SEGMENTS, 0): MATCH('e')
 	case MATCHED_UP_TO(S_SEGMENTS, 1): MATCH('g')
@@ -342,7 +342,7 @@ int Lexer::process_character(char peek) {
 	case MATCHED_UP_TO(S_SEGMENTS, 5): MATCH('t')
 	case MATCHED_UP_TO(S_SEGMENTS, 6): MATCH('s')
 	case MATCHED_UP_TO(S_SEGMENTS, 7): MATCH(':')
-	case MATCHED_UP_TO(S_SEGMENTS, 8): return SEGMENTS_T;
+	case MATCHED_UP_TO(S_SEGMENTS, 8): return SEGMENTS;
 
 	case MATCHED_UP_TO(S_WORDS, 0): MATCH('o')
 	case MATCHED_UP_TO(S_WORDS, 1): MATCH('r')
@@ -350,7 +350,7 @@ int Lexer::process_character(char peek) {
 	case MATCHED_UP_TO(S_WORDS, 3): MATCH('s')
 	case MATCHED_UP_TO(S_WORDS, 4): 
 		if(is_whitespace(peek))
-			return WORDS_T;
+			return WORDS;
 		else {
 			state = S_IDENTIFIER;
 			return PUSH;
@@ -380,7 +380,7 @@ Token Lexer::next_token() {
 			token_type = process_character(peek);
 		}
 		else {
-			if (token_type == NEWLINE_T)
+			if (token_type == NEWLINE)
 				line++;
 			break;
 		}

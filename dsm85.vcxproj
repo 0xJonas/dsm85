@@ -23,12 +23,14 @@
     <ClCompile Include="src\Instructions.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\parser\Lexer.cpp" />
+    <ClCompile Include="src\parser\Parser.cpp" />
     <ClCompile Include="src\util.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ArgumentParser.h" />
     <ClInclude Include="src\Instructions.h" />
     <ClInclude Include="src\parser\Lexer.h" />
+    <ClInclude Include="src\parser\Parser.h" />
     <ClInclude Include="src\util.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
