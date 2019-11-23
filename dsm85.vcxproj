@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\ArgumentParser.cpp" />
+    <ClCompile Include="src\DSMInfo.cpp" />
     <ClCompile Include="src\Instructions.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\parser\Lexer.cpp" />
@@ -28,6 +29,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ArgumentParser.h" />
+    <ClInclude Include="src\DSMInfo.h" />
     <ClInclude Include="src\Instructions.h" />
     <ClInclude Include="src\parser\Lexer.h" />
     <ClInclude Include="src\parser\Parser.h" />
