@@ -146,24 +146,11 @@ public:
 	}
 
 	/*
-	Adds a segment to this DSMInfo. If it overlaps with already existing segments, an exception is thrown.
+	Returns the data type at the current address. This first checks if any single-address or ranged labels specify a data type.
+	If not this function returns the data_type of the current segment. If the current address does not lie in a segments,
+	this function returns CODE_T.
 	*/
-	void add_segment(std::string name, data_type data_type, unsigned int start_adddress, unsigned int end_address);
-
-	/*
-	Adds a new single-address label to this DSMInfo. If a label already exists at the given address, it will get overwritten.
-	*/
-	void add_label(std::string name, unsigned int address, data_type type, bool jump_label=true);
-
-	/*
-	Adds a new range label to this DSMInfo. This will override all existing labels inside the given range.
-	*/
-	void add_range_label(std::string name, unsigned int address, unsigned int end_address, data_type type, bool jump_label = false);
-
-	/*
-	Adds a new comment to this DSMInfo. If a comment already exists at the given address, it will get overwritten.
-	*/
-	void add_comment(std::string text, unsigned int address);
+	data_type get_data_type();
 
 	/*
 	Resets the DSMInfo stream and initialized it with the given base_address.
@@ -176,14 +163,9 @@ public:
 	void advance();
 
 	/*
-	Checks wether there is a comment at the current address.
+	Adds a segment to this DSMInfo. If it overlaps with already existing segments, an exception is thrown.
 	*/
-	bool has_comment();
-
-	/*
-	Returns a pointer to the comment at the current address, or nullptr if there is none.
-	*/
-	Comment *get_comment();
+	void add_segment(std::string name, data_type data_type, unsigned int start_adddress, unsigned int end_address);
 
 	/*
 	Checks whether a segment starts at the current address.
@@ -201,11 +183,39 @@ public:
 	Segment *get_segment();
 
 	/*
-	Returns the data type at the current address. This first checks if any single-address or ranged labels specify a data type.
-	If not this function returns the data_type of the current segment. If the current address does not lie in a segments,
-	this function returns CODE_T.
+	Adds a new comment to this DSMInfo. If a comment already exists at the given address, it will get overwritten.
 	*/
-	data_type get_data_type();
+	void add_comment(std::string text, unsigned int address);
+
+	/*
+	Checks wether there is a comment at the current address.
+	*/
+	bool has_comment();
+
+	/*
+	Returns a pointer to the comment at the current address, or nullptr if there is none.
+	*/
+	Comment *get_comment();
+	
+	/*
+	Adds a new single-address label to this DSMInfo. If a label already exists at the given address, it will get overwritten.
+	*/
+	void add_label(std::string name, unsigned int address, data_type type, bool jump_label = true);
+
+	/*
+	Adds a new range label to this DSMInfo. This will override all existing labels inside the given range.
+	*/
+	void add_range_label(std::string name, unsigned int address, unsigned int end_address, data_type type, bool jump_label = false);
+
+	/*
+	Checks whether there is a label at the given address
+	*/
+	bool label_at(unsigned int address);
+
+	/*
+	Returns the label at the given address or nullptr if there is none
+	*/
+	Label *get_label(unsigned int address);
 
 	//Test
 	void test();

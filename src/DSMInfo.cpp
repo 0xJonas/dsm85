@@ -18,6 +18,8 @@ static int bisect(std::vector<T> list, unsigned int address, unsigned int (*valu
 	return pivot;
 }
 
+//--------Data type----------
+
 static unsigned int value_of_data_type(std::pair<unsigned int, data_type> item) {
 	return item.first;
 }
@@ -57,63 +59,20 @@ void DSMInfo::set_data_type(unsigned int start_address, unsigned int end_address
 		data_types.erase(start_it);
 }
 
-static unsigned int value_of_segment(Segment *item) {
-	return item->start_address;
-}
-
-void DSMInfo::add_segment(std::string name, data_type data_type, unsigned int start_address, unsigned int end_address) {
-	unsigned int start_index = bisect<Segment *>(segments, start_address, value_of_segment);
-	unsigned int end_index = bisect<Segment *>(segments, end_address, value_of_segment);
-
-	//check if segment overlaps with existing segments
-	if (start_index != end_index
-		|| start_index > 0 && segments[start_index-1]->end_address >= start_address)
-		throw std::invalid_argument("Segments can not overlap");
-
-	Segment *s = new Segment(name, data_type, start_address, end_address);
-	segments.insert(segments.begin() + start_index, s);
-}
-
-
-void DSMInfo::add_label(std::string name, unsigned int address, data_type type, bool jump_label) {
-	Label *l = new Label(name, address, type, jump_label);
-	label_refs.push_back(l);
-
-	labels[address] = l;
-	set_data_type(address, address + 1, type);
-
-}
-
-void DSMInfo::add_range_label(std::string name, unsigned int start_address, unsigned int end_address, data_type type, bool jump_label) {
-	RangeLabel *rl = new RangeLabel(name, start_address, end_address, type, jump_label);
-	label_refs.push_back(rl);
-
-	//Add pointer to the new label for every byte in the range.
-	for (unsigned int i = start_address; i <= end_address; i++) {
-		labels[i] = rl;
+data_type DSMInfo::get_data_type() {
+	data_type type = data_types[data_type_index].second;
+	if (type == UNDEFINED_T) {
+		Segment *s = get_segment();
+		if (s)
+			return s->type;
+		else
+			return CODE_T;
 	}
-	set_data_type(start_address, end_address + 1, type);
+	else
+		return type;
 }
 
-
-static unsigned int value_of_comment(Comment *c) {
-	return c->address;
-}
-
-void DSMInfo::add_comment(std::string text, unsigned int address) {
-	unsigned int index = bisect<Comment*>(comments, address, value_of_comment);
-
-	Comment *c = new Comment(text, address);
-
-	//delete previous comment, if it exists
-	if (index < comments.size() && comments[index]->address == address) {
-		delete comments[index];
-		comments[index] = c;
-	}
-	else {
-		comments.insert(comments.begin() + index, c);
-	}
-}
+//---------Control----------
 
 void DSMInfo::reset(unsigned int base_address) {
 	//Reset indices
@@ -172,6 +131,27 @@ void DSMInfo::advance() {
 	}
 }
 
+//-------Comments---------
+
+static unsigned int value_of_comment(Comment *c) {
+	return c->address;
+}
+
+void DSMInfo::add_comment(std::string text, unsigned int address) {
+	unsigned int index = bisect<Comment*>(comments, address, value_of_comment);
+
+	Comment *c = new Comment(text, address);
+
+	//delete previous comment, if it exists
+	if (index < comments.size() && comments[index]->address == address) {
+		delete comments[index];
+		comments[index] = c;
+	}
+	else {
+		comments.insert(comments.begin() + index, c);
+	}
+}
+
 bool DSMInfo::has_comment() {
 	return comment_index<comments.size()
 		&& current_address == comments[comment_index]->address;
@@ -182,6 +162,25 @@ Comment *DSMInfo::get_comment() {
 		return comments[comment_index];
 	else
 		return nullptr;
+}
+
+//-------Segments---------
+
+static unsigned int value_of_segment(Segment *item) {
+	return item->start_address;
+}
+
+void DSMInfo::add_segment(std::string name, data_type data_type, unsigned int start_address, unsigned int end_address) {
+	unsigned int start_index = bisect<Segment *>(segments, start_address, value_of_segment);
+	unsigned int end_index = bisect<Segment *>(segments, end_address, value_of_segment);
+
+	//check if segment overlaps with existing segments
+	if (start_index != end_index
+		|| start_index > 0 && segments[start_index - 1]->end_address >= start_address)
+		throw std::invalid_argument("Segments can not overlap");
+
+	Segment *s = new Segment(name, data_type, start_address, end_address);
+	segments.insert(segments.begin() + start_index, s);
 }
 
 bool DSMInfo::is_segment_start() {
@@ -206,17 +205,37 @@ Segment *DSMInfo::get_segment() {
 		return nullptr;
 }
 
-data_type DSMInfo::get_data_type() {
-	data_type type = data_types[data_type_index].second;
-	if (type == UNDEFINED_T) {
-		Segment *s = get_segment();
-		if (s)
-			return s->type;
-		else
-			return CODE_T;
+//---------Labels-----------
+
+void DSMInfo::add_label(std::string name, unsigned int address, data_type type, bool jump_label) {
+	Label *l = new Label(name, address, type, jump_label);
+	label_refs.push_back(l);
+
+	labels[address] = l;
+	set_data_type(address, address + 1, type);
+
+}
+
+void DSMInfo::add_range_label(std::string name, unsigned int start_address, unsigned int end_address, data_type type, bool jump_label) {
+	RangeLabel *rl = new RangeLabel(name, start_address, end_address, type, jump_label);
+	label_refs.push_back(rl);
+
+	//Add pointer to the new label for every byte in the range.
+	for (unsigned int i = start_address; i <= end_address; i++) {
+		labels[i] = rl;
 	}
+	set_data_type(start_address, end_address + 1, type);
+}
+
+bool DSMInfo::label_at(unsigned int address) {
+	return labels.find(address) != labels.end();
+}
+
+Label *DSMInfo::get_label(unsigned int address) {
+	if(label_at(address))
+		return labels[address];
 	else
-		return type;
+		return nullptr;
 }
 
 void DSMInfo::test() {
