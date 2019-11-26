@@ -3,8 +3,8 @@
 
 #include <string>
 
-#define DATA_BYTE 0x101
-#define DATA_WORD 0x102
+#define DATA_BYTE 0x100
+#define DATA_WORD 0x101
 
 enum instruction_type {
 	CONTROL, BRANCH, ARITHMETIC, MOVE, DATA

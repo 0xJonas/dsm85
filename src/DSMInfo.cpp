@@ -60,13 +60,13 @@ void DSMInfo::set_data_type(unsigned int start_address, unsigned int end_address
 }
 
 data_type DSMInfo::get_data_type() {
-	data_type type = data_types[data_type_index].second;
+	data_type type = data_types[data_type_index].second;	//Read data type from labels
 	if (type == UNDEFINED_T) {
-		Segment *s = get_segment();
+		Segment *s = get_segment();		//Read data type from current segment
 		if (s)
 			return s->type;
 		else
-			return CODE_T;
+			return CODE_T;		//Default type
 	}
 	else
 		return type;
@@ -80,6 +80,8 @@ void DSMInfo::reset(unsigned int base_address) {
 	segment_index = 0;
 	data_type_index = 0;
 	comment_index = 0;
+
+	//Setup first instance of next_*_start variables
 
 	if (segments.size() > 1)
 		next_segment_start = segments[1]->start_address;
@@ -104,8 +106,8 @@ void DSMInfo::advance() {
 	if (current_address >= next_segment_start) {
 		//Increment index
 		segment_index++;
-		if (segment_index < segments.size()) {	//Set when segment_index should be incremented again
-			next_segment_start = segments[segment_index]->start_address;
+		if (segment_index + 1 < segments.size()) {	//Set when segment_index should be incremented again
+			next_segment_start = segments[segment_index + 1]->start_address;
 		}
 		else {	//No more segments remaining
 			next_segment_start = (unsigned int) -1;

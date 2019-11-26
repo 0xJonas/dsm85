@@ -8,7 +8,7 @@ const Instruction instructions8085[] = {
 	Instruction(0x03,	"INX B",	ARITHMETIC,	0,	NONE),
 	Instruction(0x04,	"INR B",	ARITHMETIC,	0,	NONE),
 	Instruction(0x05,	"DCR B",	ARITHMETIC,	0,	NONE),
-	Instruction(0x06,	"MVI B,",	MOVE,		1,	NONE),
+	Instruction(0x06,	"MVI B,",	MOVE,		1,	IMMEDIATE),
 	Instruction(0x07,	"RLC",		ARITHMETIC,	0,	NONE),
 	Instruction(0x08,	"(DSUB)",	ARITHMETIC,	0,	NONE),
 	Instruction(0x09,	"DAD B",	ARITHMETIC,	0,	NONE),
@@ -62,7 +62,7 @@ const Instruction instructions8085[] = {
 	Instruction(0x33,	"INX SP",	ARITHMETIC,	0,	NONE),
 	Instruction(0x34,	"INR M",	ARITHMETIC,	0,	NONE),
 	Instruction(0x35,	"DCR M",	ARITHMETIC,	0,	NONE),
-	Instruction(0x36,	"MVI M, ",	MOVE,		1,	NONE),
+	Instruction(0x36,	"MVI M, ",	MOVE,		1,	IMMEDIATE),
 	Instruction(0x37,	"STC",		ARITHMETIC,	0,	NONE),
 	Instruction(0x38,	"(LDSI) ",	ARITHMETIC,	1,	IMMEDIATE),
 	Instruction(0x39,	"DAD SP",	ARITHMETIC,	0,	NONE),
@@ -290,6 +290,6 @@ const Instruction instructions8085[] = {
 	Instruction(0xfe,	"CPI ",		ARITHMETIC,	1,	IMMEDIATE),
 	Instruction(0xff,	"RST 7",	BRANCH,		0,	NONE),
 
-	Instruction(0x100,	".db ",		DATA,		1,	IMMEDIATE),
-	Instruction(0x101,	".dw ",		DATA,		1,  IMMEDIATE),
+	Instruction(DATA_BYTE,	".db ",		DATA,		1,	IMMEDIATE),
+	Instruction(DATA_WORD,	".dw ",		DATA,		2,  IMMEDIATE),
 };

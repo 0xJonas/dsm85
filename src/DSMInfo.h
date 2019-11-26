@@ -32,7 +32,10 @@ jump_label determines whether this label will appear as a jump target in the out
 If jump_label is false, the label will only appear if used as an operand.
 */
 struct Label {
+protected:
 	std::string name;
+
+public:
 	unsigned int start_address;
 	data_type type;
 	bool jump_label;
