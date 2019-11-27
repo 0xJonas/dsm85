@@ -6,6 +6,7 @@
 #include <vector>
 #include <unordered_map>
 #include "Lexer.h"
+#include "../DSMInfo.h"
 
 class parse_error : public std::exception {
 
@@ -24,8 +25,12 @@ public:
 	int get_symbol_value(std::string identifier);
 	void add_symbol(std::string symbol, int value);
 
-	void add_source_file(std::string source) {
+	void enter_source_file(std::string source) {
 		source_files.push_back(source);
+	}
+
+	void leave_source_file() {
+		source_files.pop_back();
 	}
 
 	bool is_source_file_loaded(std::string source) {
@@ -40,43 +45,44 @@ public:
 class Parser {
 
 	std::string source;
+	DSMInfo &info;
+
 	Lexer lexer;
 	Token peek = Token(EOI, "");
 
 	SymbolTable &symbol_table;
-	std::unordered_map<unsigned int, std::string> *label_output;
 
 	void file();
 	void section();
 	void include_section();
 	void segments_section();
 	void labels_section();
-	void data_type();
+	data_type read_data_type();
 	void comments_section();
-	void label_target();
+	std::pair<unsigned int, unsigned int> label_target();
 	int address_expr();
 	int address_product();
 	int single_address();
 
 	void error(std::string error_message);
 	Token match(int token_type, std::string error = "");
+	void match_newline();
 	Token consume();
 	void skip_blank_lines();
 
-	Parser(std::istream &in, std::string source, SymbolTable &symbol_table, std::unordered_map<unsigned int, std::string> *label_output)
+	Parser(std::istream &in, std::string source, SymbolTable &symbol_table, DSMInfo &info)
 		: lexer(Lexer(in)),
 		  source(source),
 		  symbol_table(symbol_table),
-		  label_output(label_output)
+		  info(info)
 	{
 		peek = lexer.next_token();
-		symbol_table.add_source_file(source);
 	}
 
 public:
 	static void parse(std::istream &in,
 		std::string source,
-		std::unordered_map<unsigned int, std::string> *label_output);
+		DSMInfo &info);
 };
 
 #endif

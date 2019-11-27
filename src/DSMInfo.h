@@ -168,7 +168,7 @@ public:
 	/*
 	Adds a segment to this DSMInfo. If it overlaps with already existing segments, an exception is thrown.
 	*/
-	void add_segment(std::string name, data_type data_type, unsigned int start_adddress, unsigned int end_address);
+	void add_segment(std::string name, data_type data_type, unsigned int start_address, unsigned int end_address);
 
 	/*
 	Checks whether a segment starts at the current address.

@@ -10,7 +10,7 @@
 #include "Instructions.h"
 #include "ArgumentParser.h"
 #include "util.h"
-#include "parser/Lexer.h"
+#include "parser/Parser.h"
 #include "DSMInfo.h"
 
 #define VERSION_MAJOR 1
@@ -25,6 +25,7 @@
 #define NO_ERROR 0
 #define ERROR_FILE_NOT_FOUND 1
 #define ERROR_BAD_ARGUMENTS 2
+#define ERROR_BAD_LABEL_FILE 3
 
 /*
 A single Assembly line, consisting of an address, an instruction and an operand.
@@ -60,6 +61,8 @@ std::string labels_file = "";
 
 unsigned int current_address = 0;
 
+unsigned int data_instruction_streak = 0;
+
 /*
 ================================
            READ INPUT
@@ -93,6 +96,7 @@ Checks whether the byte at a given address can be read in as an operand. A byte 
 1) it is outside the range that should be read (as specified by start_address and end_address)
 2) there is a label pointing to that address, which means that a new instruction has to start there.
 3) a new segment starts at that address
+4) the instruction has a comment
 */
 static bool can_read_as_operand(unsigned int address) {
 	//start_address and end_address are relative to the input file, while the address parameter is based on base_address.
@@ -101,6 +105,8 @@ static bool can_read_as_operand(unsigned int address) {
 	if (label_at(address))
 		return false;
 	if (info.is_segment_start())
+		return false;
+	if (info.has_comment())
 		return false;
 	return true;
 }
@@ -200,7 +206,7 @@ static void single_pass(std::istream &rom_stream) {
 
 	//Read instructions
 	current_address = base_address;
-	while (!rom_stream.eof() && rom_stream.tellg()<=end_address) {
+	while (!rom_stream.eof() && rom_stream.tellg() <= end_address) {
 		int address = current_address;
 		int data = 0;
 
@@ -266,7 +272,7 @@ static void write_operand(const AssemblyLine &line, std::ostream &listing_stream
 Writes the start of a segment.
 */
 static void write_segment_start(Segment *segment, std::ostream &listing_stream) {
-	listing_stream << std::endl;
+	listing_stream << std::endl << std::endl;
 	listing_stream << "=== Start of " << segment->name << " ===";
 }
 
@@ -378,45 +384,43 @@ Writes a data instruction to the output stream. Data instructions are handled di
 that successive data instructions are merged together.
 */
 static void write_data_instruction(const AssemblyLine &line, std::ostream &listing_stream) {
-	static int db_instruction_streak = 0;
 	static int prev_opcode = -1;
 
 	//Start a new line if the type of data instruction switched (e.g. from DATA_BYTE to DATA_WORD)
 	if (line.instruction->opcode != prev_opcode)
-		db_instruction_streak = 0;
+		data_instruction_streak = 0;
 
 	//Start a new line if the current instruction has a label pointing to it
 	if (info.label_at(line.address))
-		db_instruction_streak = 0;
+		data_instruction_streak = 0;
 
 	//Start a new line if the next instruction is the start of a new segment
 	if (info.is_segment_start())
-		db_instruction_streak = 0;
+		data_instruction_streak = 0;
 
 	//Start a new line or continue an existing one depending on the previous instructions
-	if (db_instruction_streak == 0) {
+	if (data_instruction_streak == 0) {
 		start_data_instruction(line, listing_stream);
 	}
 	else {
 		continue_data_instruction(line, listing_stream);
 	}
 
-	db_instruction_streak++;
+	data_instruction_streak++;
 
 	//Only write a maximum of 8 data instructions on a single line
-	if (db_instruction_streak >= 8)
-		db_instruction_streak = 0;
+	if (data_instruction_streak >= 8)
+		data_instruction_streak = 0;
 
 	//If the current line has a comment, the line has to end prematurely
 	if (info.has_comment()) {
 		listing_stream << INDENT << ";" << info.get_comment()->text;
-		db_instruction_streak = 0;
+		data_instruction_streak = 0;
 	}
-
 
 	//End the current line if it is the last instruction of a segment
 	if (info.is_segment_end())
-		db_instruction_streak = 0;
+		data_instruction_streak = 0;
 
 	prev_opcode = line.instruction->opcode;
 }
@@ -444,6 +448,7 @@ static void write_listing(std::ostream &listing_stream) {
 			write_code_line(line, listing_stream);	//Write code
 			for (int j = 0; j < line.instruction->operand_length; j++)
 				info.advance();
+			data_instruction_streak = 0;
 		}
 
 		//Write segment trailer
@@ -489,7 +494,9 @@ static void copy_labels_to_info(std::unordered_map<unsigned int, std::string> &l
 }
 
 static void print_version() {
-	std::cout << "8085 DSM version " << VERSION_MAJOR << "." << VERSION_MINOR << std::endl;
+	std::cout << "dsm85 version " << VERSION_MAJOR << "." << VERSION_MINOR << std::endl;
+	std::cout << "An intel 8080 and 8085 disassembler" << std::endl;
+	std::cout << "Written in 2019 by Delphi1024" << std::endl << std::endl;
 }
 
 /*
@@ -506,13 +513,6 @@ static inline bool set_int_argument(unsigned int &arg, std::string value) {
 }
 
 int main(int argc, char *argv[]) {
-	
-	info.add_range_label("hiram", 0x2000, 0x27ff, CODE_T);
-	info.add_segment("Test", CODE_T, 0x00, 0xff);
-	info.add_segment("Test2", DWORDS_LE_T, 0x100, 0x1ff);
-	info.add_comment("This is a comment", 0x06);
-	
-
 	//Setup ArgumentParser
 	ArgumentParser parser;
 	parser.create_argument(
@@ -527,12 +527,12 @@ int main(int argc, char *argv[]) {
 		{"file"},
 		[](std::string *params) -> bool {output_file = params[0];  return true; }
 	);
-	/*parser.create_argument(
+	parser.create_argument(
 		"-l", "--labels",
 		"Load labels from file.",
 		{ "file" },
-		[](std::string *params) -> bool {label_file = params[0];  return true; }
-	);*/
+		[](std::string *params) -> bool {labels_file = params[0];  return true; }
+	);
 	parser.create_argument(
 		"-a", "--address",
 		"Add an address column to the disassembly.",
@@ -598,13 +598,29 @@ int main(int argc, char *argv[]) {
 		return ERROR_FILE_NOT_FOUND;
 	}
 
-	std::ofstream listing_stream(output_file, std::ios_base::out);
-
 	//add labels for interrupt vectors
 	if(hw_labels)
 		add_interrupt_labels();
 
-	//load user labels into final labels
+	//load user labels
+	if (!labels_file.empty()) {
+		std::ifstream labels_stream(labels_file, std::ios_base::in | std::ios_base::binary);
+		if (labels_stream.fail()) {
+			std::cerr << "Error: File not found: " << labels_file << std::endl;
+			return ERROR_FILE_NOT_FOUND;
+		}
+
+		try {
+			Parser::parse(labels_stream, labels_file, info);
+		}
+		catch (parse_error) {
+			return ERROR_BAD_LABEL_FILE;
+		}
+
+		labels_stream.close();
+	}
+
+	std::ofstream listing_stream(output_file, std::ios_base::out);
 
 	//First pass
 	label_output = &first_pass_labels;

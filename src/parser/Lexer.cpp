@@ -179,7 +179,7 @@ int Lexer::process_character(char peek) {
 		return PUSH;
 	case S_COMMENT:
 		if (peek == '\n') {
-			state = S_START;
+			state = S_NEWLINE;
 			return PUSH;
 		}else
 			return SKIP;
@@ -393,7 +393,7 @@ int Lexer::get_line_number() {
 }
 
 void Lexer::reset() {
-	line = 0;
+	line = 1;
 	in.clear();
 	in.seekg(0);
 	peek = in.get();
