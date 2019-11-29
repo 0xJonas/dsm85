@@ -57,7 +57,7 @@ const Instruction instructions8085[] = {
 
 	//		    Opcode  Mnemonic    Ins. type   #Op Op type
 	Instruction(0x30,	"SIM",		CONTROL,	0,	NONE),
-	Instruction(0x31,	"LXI SP, ",	MOVE,		2,	IMMEDIATE),
+	Instruction(0x31,	"LXI SP,",	MOVE,		2,	IMMEDIATE),
 	Instruction(0x32,	"STA ",		MOVE,		2,	ADDRESS),
 	Instruction(0x33,	"INX SP",	ARITHMETIC,	0,	NONE),
 	Instruction(0x34,	"INR M",	ARITHMETIC,	0,	NONE),

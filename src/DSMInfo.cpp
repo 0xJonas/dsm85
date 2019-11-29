@@ -83,25 +83,20 @@ void DSMInfo::reset(unsigned int base_address) {
 
 	//Setup first instance of next_*_start variables
 
-	if (segments.size() > 1)
-		next_segment_start = segments[1]->start_address;
-	else	//One or zero user-defined segments
+	if (segments.size() > 0)
+		next_segment_start = segments[0]->start_address;
+	else	//no user-defined segments
 		next_segment_start = (unsigned int)-1;
 
-	if (data_types.size() > 1)
-		next_data_type_start = data_types[1].first;
-	else	//No user-defined data types (index 1 is always UNDEFINED_T)
-		next_data_type_start = (unsigned int)-1;
+	next_data_type_start = 0; // data_types[0].first is always 0
 
-	if (comments.size() > 1)
-		next_comment = comments[1]->address;
+	if (comments.size() > 0)
+		next_comment = comments[0]->address;
 	else	//No user-defined comments
 		next_comment = (unsigned int)-1;
 }
 
 void DSMInfo::advance() {
-	current_address++;
-
 	//Check if the next segment has been entered
 	if (current_address >= next_segment_start) {
 		//Increment index
@@ -131,6 +126,8 @@ void DSMInfo::advance() {
 			next_comment = (unsigned int)-1;
 		}
 	}
+
+	current_address++;
 }
 
 //-------Comments---------
