@@ -10,8 +10,9 @@ enum instruction_type {
 	CONTROL, BRANCH, ARITHMETIC, MOVE, DATA
 };
 
+//IMMEDIATE HYBRID: Classified as an immediate value but frequently used as an address (eg. LXI instructions)
 enum operand_type {
-	NONE, IMMEDIATE, ADDRESS
+	NONE, IMMEDIATE, ADDRESS, IMMEDIATE_HYBRID
 };
 
 struct Instruction {

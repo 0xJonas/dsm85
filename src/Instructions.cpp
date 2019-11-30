@@ -3,7 +3,7 @@
 const Instruction instructions8085[] = {
 	//		    Opcode  Mnemonic    Ins. type   #Op Op type
 	Instruction(0x00,	"NOP",		CONTROL,	0,	NONE),
-	Instruction(0x01,	"LXI B,",	MOVE,		2,	IMMEDIATE),
+	Instruction(0x01,	"LXI B,",	MOVE,		2,	IMMEDIATE_HYBRID),
 	Instruction(0x02,	"STAX B",	MOVE,		0,	NONE),
 	Instruction(0x03,	"INX B",	ARITHMETIC,	0,	NONE),
 	Instruction(0x04,	"INR B",	ARITHMETIC,	0,	NONE),
@@ -21,7 +21,7 @@ const Instruction instructions8085[] = {
 
 	//		    Opcode  Mnemonic    Ins. type   #Op Op type
 	Instruction(0x10,	"*ARHL",	ARITHMETIC,	0,	NONE),
-	Instruction(0x11,	"LXI D,",	MOVE,		2,	IMMEDIATE),
+	Instruction(0x11,	"LXI D,",	MOVE,		2,	IMMEDIATE_HYBRID),
 	Instruction(0x12,	"STAX D",	MOVE,		0,	NONE),
 	Instruction(0x13,	"INX D",	ARITHMETIC,	0,	NONE),
 	Instruction(0x14,	"INR D",	ARITHMETIC,	0,	NONE),
@@ -39,7 +39,7 @@ const Instruction instructions8085[] = {
 
 	//		    Opcode  Mnemonic    Ins. type  #Op  Op type
 	Instruction(0x20,	"RIM",		CONTROL,	0,	NONE),
-	Instruction(0x21,	"LXI H,",	MOVE,		2,	IMMEDIATE),
+	Instruction(0x21,	"LXI H,",	MOVE,		2,	IMMEDIATE_HYBRID),
 	Instruction(0x22,	"SHLD ",	MOVE,		2,	ADDRESS),
 	Instruction(0x23,	"INX H",	ARITHMETIC,	0,	NONE),
 	Instruction(0x24,	"INR H",	ARITHMETIC,	0,	NONE),
@@ -57,7 +57,7 @@ const Instruction instructions8085[] = {
 
 	//		    Opcode  Mnemonic    Ins. type   #Op Op type
 	Instruction(0x30,	"SIM",		CONTROL,	0,	NONE),
-	Instruction(0x31,	"LXI SP,",	MOVE,		2,	IMMEDIATE),
+	Instruction(0x31,	"LXI SP,",	MOVE,		2,	IMMEDIATE_HYBRID),
 	Instruction(0x32,	"STA ",		MOVE,		2,	ADDRESS),
 	Instruction(0x33,	"INX SP",	ARITHMETIC,	0,	NONE),
 	Instruction(0x34,	"INR M",	ARITHMETIC,	0,	NONE),

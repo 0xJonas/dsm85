@@ -259,6 +259,19 @@ static void write_operand(const AssemblyLine &line, std::ostream &listing_stream
 		else
 			listing_stream << "$" << hex16bit(line.operand);
 	}
+	if (line.instruction->operand_type == IMMEDIATE_HYBRID) {
+		Label *label = info.get_label(line.operand);
+		if (label)	//Print label
+			listing_stream << label->get_operand_name(line.operand) << '(';
+		
+		if (line.instruction->operand_length == 2)
+			listing_stream << "#" << hex16bit(line.operand);
+		else
+			listing_stream << "#" << hex8bit(line.operand);
+
+		if (label)
+			listing_stream << ')';
+	}
 	if (line.instruction->operand_type == IMMEDIATE) {
 		if (line.instruction->operand_length == 2)
 			listing_stream << "#" << hex16bit(line.operand);
