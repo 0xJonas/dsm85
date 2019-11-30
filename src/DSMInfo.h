@@ -48,9 +48,16 @@ public:
 	{}
 
 	/*
-	Returns the name based on the input address. Required for RangeLabels to have an index in their names.
+	Returns the name that gets used in a jump target context.
 	*/
-	virtual std::string get_name(unsigned int address) {
+	virtual std::string get_jump_target_name(unsigned int address) {
+		return name;
+	}
+
+	/*
+	Returns the name that gets used in an operand context.
+	*/
+	virtual std::string get_operand_name(unsigned int address) {
 		return name;
 	}
 
@@ -73,11 +80,17 @@ struct RangeLabel : public Label {
 		end_address(end_address) 
 	{}
 
+	virtual std::string get_jump_target_name(unsigned int address) {
+		if (address == start_address)
+			return name;
+		else
+			return "";
+	}
 
 	/*
 	Returns the name based on the input address. Required for RangeLabels to have an index in their names.
 	*/
-	virtual std::string get_name(unsigned int address) {
+	virtual std::string get_operand_name(unsigned int address) {
 		return name + "[" + std::to_string(address - start_address) + "]";
 	}
 

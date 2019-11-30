@@ -72,8 +72,8 @@ unsigned int data_instruction_streak = 0;
 /*
 Checks if there is a label pointing to the given address. Since the disassembler uses two lists, both have to be checked.
 */
-static bool label_at(unsigned int address) {
-	return info.label_at(address)
+static bool jump_label_at(unsigned int address) {
+	return (info.label_at(address) && info.get_label(address)->jump_label)
 		|| first_pass_labels.find(address) != first_pass_labels.end()
 		|| second_pass_labels.find(address) != second_pass_labels.end();
 }
@@ -94,7 +94,7 @@ static void create_label_if_needed(const AssemblyLine &line) {
 /*
 Checks whether the byte at a given address can be read in as an operand. A byte cannot be an operand if
 1) it is outside the range that should be read (as specified by start_address and end_address)
-2) there is a label pointing to that address, which means that a new instruction has to start there.
+2) there is a jump label pointing to that address, which means that a new instruction has to start there.
 3) a new segment starts at that address
 4) the instruction has a comment
 */
@@ -102,7 +102,7 @@ static bool can_read_as_operand(unsigned int address) {
 	//start_address and end_address are relative to the input file, while the address parameter is based on base_address.
 	if (address<base_address || address>base_address + end_address - start_address)
 		return false;
-	if (label_at(address))
+	if (jump_label_at(address))
 		return false;
 	if (info.is_segment_start())
 		return false;
@@ -255,7 +255,7 @@ static void write_operand(const AssemblyLine &line, std::ostream &listing_stream
 	if (line.instruction->operand_type == ADDRESS) {
 		Label *label = info.get_label(line.operand);
 		if (label)	//Print label
-			listing_stream << label->get_name(line.operand);
+			listing_stream << label->get_operand_name(line.operand);
 		else
 			listing_stream << "$" << hex16bit(line.operand);
 	}
@@ -265,7 +265,6 @@ static void write_operand(const AssemblyLine &line, std::ostream &listing_stream
 		else
 			listing_stream << "#" << hex8bit(line.operand);
 	}
-
 }
 
 /*
@@ -317,8 +316,8 @@ static void write_code_line(const AssemblyLine &line, std::ostream &listing_stre
 
 	//Write label
 	Label *label = info.get_label(line.address);
-	if (label) {
-		std::string name = label->get_name(line.address);
+	if (label && label->jump_label) {
+		std::string name = label->get_jump_target_name(line.address);
 		write_jump_label(name, listing_stream);
 	}
 	else
@@ -339,8 +338,6 @@ static void write_code_line(const AssemblyLine &line, std::ostream &listing_stre
 	//Add extra newline after RET instruction
 	if (line.instruction->opcode == 0xc9)
 		listing_stream << std::endl;
-
-	
 }
 
 /*
@@ -357,8 +354,8 @@ static void start_data_instruction(const AssemblyLine &line, std::ostream &listi
 
 	//Write label
 	Label *label = info.get_label(line.address);
-	if (label) {
-		std::string name = label->get_name(line.address);
+	if (label && label->jump_label) {
+		std::string name = label->get_jump_target_name(line.address);
 		write_jump_label(name, listing_stream);
 	}
 	else
@@ -391,7 +388,7 @@ static void write_data_instruction(const AssemblyLine &line, std::ostream &listi
 		data_instruction_streak = 0;
 
 	//Start a new line if the current instruction has a label pointing to it
-	if (info.label_at(line.address))
+	if (jump_label_at(line.address))
 		data_instruction_streak = 0;
 
 	//Start a new line if the next instruction is the start of a new segment
@@ -436,6 +433,9 @@ static void write_listing(std::ostream &listing_stream) {
 			write_segment_start(info.get_segment(), listing_stream);
 
 		AssemblyLine line = instructions[i];
+
+		if (line.address == 0xd)
+			info.is_segment_start();
 
 		if (line.instruction->opcode == DATA_BYTE) {		//Write data byte
 			write_data_instruction(line, listing_stream);

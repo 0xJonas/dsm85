@@ -83,20 +83,27 @@ void DSMInfo::reset(unsigned int base_address) {
 
 	//Setup first instance of next_*_start variables
 
-	if (segments.size() > 0)
-		next_segment_start = segments[0]->start_address;
+	if (segments.size() > 1)
+		next_segment_start = segments[1]->start_address;
 	else	//no user-defined segments
 		next_segment_start = (unsigned int)-1;
 
-	next_data_type_start = 0; // data_types[0].first is always 0
+	if (data_types.size() > 1) {
+		next_data_type_start = data_types[1].first;
+	}
+	else {
+		next_data_type_start = (unsigned int)-1;
+	}
 
-	if (comments.size() > 0)
-		next_comment = comments[0]->address;
+	if (comments.size() > 1)
+		next_comment = comments[1]->address;
 	else	//No user-defined comments
 		next_comment = (unsigned int)-1;
 }
 
 void DSMInfo::advance() {
+	current_address++;
+
 	//Check if the next segment has been entered
 	if (current_address >= next_segment_start) {
 		//Increment index
@@ -111,23 +118,22 @@ void DSMInfo::advance() {
 
 	//Check if the data type changed. Since the last entry in the data type vector extends to the end of the file, do not increment
 	//the index again when the last change has been reached.
-	if (current_address >= next_data_type_start && data_type_index < data_types.size() - 1) {
+	if (current_address >= next_data_type_start && data_type_index + 1 < data_types.size()) {
 		data_type_index++;
-		next_data_type_start = data_types[data_type_index].first;
+		if(data_type_index + 1 < data_types.size())
+			next_data_type_start = data_types[data_type_index + 1].first;
 	}
 
 	//Check if the next address has a comment
 	if (current_address >= next_comment) {
 		comment_index++;
-		if (comment_index < comments.size()) {
-			next_comment = comments[comment_index]->address;
+		if (comment_index + 1< comments.size()) {
+			next_comment = comments[comment_index + 1]->address;
 		}
 		else {
 			next_comment = (unsigned int)-1;
 		}
 	}
-
-	current_address++;
 }
 
 //-------Comments---------
@@ -217,10 +223,15 @@ void DSMInfo::add_label(std::string name, unsigned int address, data_type type, 
 
 void DSMInfo::add_range_label(std::string name, unsigned int start_address, unsigned int end_address, data_type type, bool jump_label) {
 	RangeLabel *rl = new RangeLabel(name, start_address, end_address, type, jump_label);
+	RangeLabel *rl_head = new RangeLabel(name, start_address, end_address, type, true);
 	label_refs.push_back(rl);
+	label_refs.push_back(rl_head);
+
+	//Separate label for the first element, since it signifies the start of the range
+	labels[start_address] = rl_head;
 
 	//Add pointer to the new label for every byte in the range.
-	for (unsigned int i = start_address; i <= end_address; i++) {
+	for (unsigned int i = start_address + 1; i <= end_address; i++) {
 		labels[i] = rl;
 	}
 	set_data_type(start_address, end_address + 1, type);

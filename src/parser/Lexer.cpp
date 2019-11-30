@@ -292,7 +292,7 @@ int Lexer::process_character(char peek) {
 		}
 	case MATCHED_UP_TO(S_DWORDS_BE, 6):
 		if (peek == 'b')
-			state++;
+			state = MATCHED_UP_TO(S_DWORDS_BE, 7);
 		else if (peek == 'l')
 			state = MATCHED_UP_TO(S_DWORDS_LE, 7);
 		else if (is_whitespace(peek))
