@@ -4,6 +4,7 @@ x64/
 [Dd]ebug/
 [Rr]elease/
 
-out.lst
-rom.bin
+*.lst
+*.bin
+*.COM
 /test_labels.txt

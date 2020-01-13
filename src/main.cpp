@@ -507,9 +507,9 @@ static void copy_labels_to_info(std::unordered_map<unsigned int, std::string> &l
 }
 
 static void print_version() {
-	std::cout << "dsm85 version " << VERSION_MAJOR << "." << VERSION_MINOR << std::endl;
+	std::cout << "=== dsm85 version " << VERSION_MAJOR << "." << VERSION_MINOR << " ===" << std::endl;
 	std::cout << "An intel 8080 and 8085 disassembler" << std::endl;
-	std::cout << "Written in 2019 by Delphi1024" << std::endl << std::endl;
+	std::cout << "Written in 2020 by Delphi1024" << std::endl << std::endl;
 }
 
 /*
@@ -536,7 +536,7 @@ int main(int argc, char *argv[]) {
 	);
 	parser.create_argument(
 		"-o", "--output",
-		"Name of the file to write the disassembly to. If neither an output file nor --stdout is given,\nthe output will be written to [input file name].lst",
+		"Name of the file to write the disassembly to. If no output file is given,\nthe output will be written to [input file name].lst",
 		{"file"},
 		[](std::string *params) -> bool {output_file = params[0];  return true; }
 	);
@@ -561,7 +561,7 @@ int main(int argc, char *argv[]) {
 	parser.create_argument(
 		"-n", "--length",
 		"Sets the number of bytes to be read from the input file. If both -n and -e are given,\n-e takes priority.",
-		{ "address" },
+		{ "integer" },
 		[](std::string *params) -> bool { return set_int_argument(input_length, params[0]); }
 	);
 	parser.create_argument(
@@ -593,6 +593,7 @@ int main(int argc, char *argv[]) {
 		|| parser.files.size()!=1) {
 		print_version();
 		parser.print_descriptions(std::cout);
+		std::cout << std::endl << "Please refer to the wiki for further information:" << std::endl << "  https://github.com/0xJonas/dsm85/wiki" << std::endl << std::endl;
 		return print_help ? NO_ERROR : ERROR_BAD_ARGUMENTS;
 	}
 
@@ -609,6 +610,13 @@ int main(int argc, char *argv[]) {
 	if (rom_stream.fail()) {
 		std::cerr << "Error: File not found: " << input_file << std::endl;
 		return ERROR_FILE_NOT_FOUND;
+	}
+
+	//Set output file to default if not given
+	if (output_file.length() == 0) {
+		size_t ending = input_file.rfind(".");
+		std::string input_name = input_file.substr(0, ending);
+		output_file = input_name + ".lst";
 	}
 
 	//add labels for interrupt vectors
@@ -634,6 +642,10 @@ int main(int argc, char *argv[]) {
 	}
 
 	std::ofstream listing_stream(output_file, std::ios_base::out);
+	if (!listing_stream) {
+		std::cerr << "Error: File could net be opened: " << output_file << std::endl;
+		return ERROR_FILE_NOT_FOUND;
+	}
 
 	//First pass
 	label_output = &first_pass_labels;
