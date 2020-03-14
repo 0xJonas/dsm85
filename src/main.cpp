@@ -63,6 +63,8 @@ unsigned int current_address = 0;
 
 unsigned int data_instruction_streak = 0;
 
+unsigned int text_instruction_streak = 0;
+
 /*
 ================================
            READ INPUT
@@ -112,19 +114,11 @@ static bool can_read_as_operand(unsigned int address) {
 }
 
 /*
-Adds a data byte pseudo-instruction. 
+Adds a pseudo-instruction. 
 */
-static void add_data_byte(int address, int byte) {
-	AssemblyLine data_byte(address, &(instructions8085[DATA_BYTE]), byte);
-	instructions.push_back(std::move(data_byte));
-}
-
-/*
-Adds a data word pseudo-instruction.
-*/
-static void add_data_word(int address, int word) {
-	AssemblyLine data_word(address, &(instructions8085[DATA_WORD]), word);
-	instructions.push_back(std::move(data_word));
+static void add_data_instruction(int instruction, int address, int data) {
+	AssemblyLine pseudo(address, &(instructions8085[instruction]), data);
+	instructions.push_back(std::move(pseudo));
 }
 
 /*
@@ -151,7 +145,7 @@ static void read_code_instruction(std::istream &rom_stream) {
 	if (ins->operand_length == 1) {
 		if (!can_read_as_operand(current_address) || segment_end) {
 			//Output incomplete instruction (data byte) if the next byte could not be read as an operand
-			add_data_byte(address, opcode);
+			add_data_instruction(DATA_BYTE, address, opcode);
 			return;
 		}
 		else {
@@ -162,7 +156,7 @@ static void read_code_instruction(std::istream &rom_stream) {
 		//Read first operand byte
 		if (!can_read_as_operand(current_address) || segment_end) {
 			//Output incomplete instruction
-			add_data_byte(address, opcode);
+			add_data_instruction(DATA_BYTE, address, opcode);
 			return;
 		}
 		else {
@@ -176,8 +170,8 @@ static void read_code_instruction(std::istream &rom_stream) {
 		//Read second operand byte
 		if (!can_read_as_operand(current_address) || segment_end) {
 			//Output two incomplete instructions 
-			add_data_byte(address, opcode);
-			add_data_byte(address + 1, operand);
+			add_data_instruction(DATA_BYTE, address, opcode);
+			add_data_instruction(DATA_BYTE, address + 1, opcode);
 			return;
 		}
 		else {
@@ -216,26 +210,40 @@ static void single_pass(std::istream &rom_stream) {
 			break;
 		case BYTES_T:
 			data = fetch_byte(rom_stream);
-			add_data_byte(address, data);
+			add_data_instruction(DATA_BYTE, address, data);
 			break;
 		case DWORDS_BE_T:
 			data = fetch_byte(rom_stream);
 			if (info.get_data_type() == DWORDS_BE_T) {
 				data = (data << 8) | (fetch_byte(rom_stream) & 0xff);
-				add_data_word(address, data);
+				add_data_instruction(DATA_WORD, address, data);
 			}
 			else {
-				add_data_byte(address, data);
+				add_data_instruction(DATA_BYTE, address, data);
 			}
 			break;
 		case DWORDS_LE_T:
 			data = fetch_byte(rom_stream);
 			if (info.get_data_type() == DWORDS_LE_T) {
 				data = (fetch_byte(rom_stream) << 8) | (data & 0xff);
-				add_data_word(address, data);
+				add_data_instruction(DATA_WORD, address, data);
 			}
 			else {
-				add_data_byte(address, data);
+				add_data_instruction(DATA_BYTE, address, data);
+			}
+			break;
+		case TEXT_T:
+			data = fetch_byte(rom_stream);
+			add_data_instruction(DATA_TEXT, address, data);
+			break;
+		case RET_T:
+			data = fetch_byte(rom_stream);
+			if (info.get_data_type() == RET_T) {
+				data = (data << 8) | (fetch_byte(rom_stream) & 0xff);
+				add_data_instruction(DATA_RET, address, data);
+			}
+			else {
+				add_data_instruction(DATA_BYTE, address, data);
 			}
 			break;
 		}
@@ -252,18 +260,20 @@ static void single_pass(std::istream &rom_stream) {
 Writes the operand of an AssemblyLine. If the operand is an address for which a label exist, the label is printed.
 */
 static void write_operand(const AssemblyLine &line, std::ostream &listing_stream) {
-	if (line.instruction->operand_type == ADDRESS) {
-		Label *label = info.get_label(line.operand);
+	Label *label = nullptr;
+	switch (line.instruction->operand_type) {
+	case ADDRESS: 
+		label = info.get_label(line.operand);
 		if (label)	//Print label
 			listing_stream << label->get_operand_name(line.operand);
 		else
 			listing_stream << "$" << hex16bit(line.operand);
-	}
-	if (line.instruction->operand_type == IMMEDIATE_HYBRID) {
-		Label *label = info.get_label(line.operand);
+		break;
+	case IMMEDIATE_HYBRID:
+		label = info.get_label(line.operand);
 		if (label)	//Print label
 			listing_stream << label->get_operand_name(line.operand) << '(';
-		
+
 		if (line.instruction->operand_length == 2)
 			listing_stream << "#" << hex16bit(line.operand);
 		else
@@ -271,12 +281,15 @@ static void write_operand(const AssemblyLine &line, std::ostream &listing_stream
 
 		if (label)
 			listing_stream << ')';
-	}
-	if (line.instruction->operand_type == IMMEDIATE) {
+		break;
+	case IMMEDIATE:
 		if (line.instruction->operand_length == 2)
 			listing_stream << "#" << hex16bit(line.operand);
 		else
 			listing_stream << "#" << hex8bit(line.operand);
+		break;
+	case CHARACTER:
+		listing_stream << (char)line.operand;
 	}
 }
 
@@ -354,8 +367,8 @@ static void write_code_line(const AssemblyLine &line, std::ostream &listing_stre
 }
 
 /*
-Successive Data instructions (DATA_BYTE and DATA_WORD) are merged to aid readibility and to preserve space. This function writes
-the first part of a data instruction to the output stream.
+Successive pseudo instructions (DATA_BYTE, DATA_WORD and TEXT) are merged to aid readibility and to preserve space. This function writes
+the first part of a pseudo instruction to the output stream.
 */
 static void start_data_instruction(const AssemblyLine &line, std::ostream &listing_stream) {
 	//Create a new line
@@ -390,8 +403,8 @@ static void continue_data_instruction(const AssemblyLine &line, std::ostream &li
 }
 
 /*
-Writes a data instruction to the output stream. Data instructions are handled differently from code instructions, in the 
-that successive data instructions are merged together.
+Writes a data instruction to the output stream. Data instructions are handled differently from code instructions, in 
+that successive data instructions are merged together. This function transparently takes care of that.
 */
 static void write_data_instruction(const AssemblyLine &line, std::ostream &listing_stream) {
 	static int prev_opcode = -1;
@@ -435,6 +448,41 @@ static void write_data_instruction(const AssemblyLine &line, std::ostream &listi
 	prev_opcode = line.instruction->opcode;
 }
 
+static void write_text_instruction(const AssemblyLine &line, std::ostream &listing_stream) {
+	//Start a new line if the current instruction has a label pointing to it
+	if (jump_label_at(line.address))
+		text_instruction_streak = 0;
+
+	//Start a new line if the next instruction is the start of a new segment
+	if (info.is_segment_start())
+		text_instruction_streak = 0;
+
+	//Start a new line or continue an existing one depending on the previous instructions
+	if (data_instruction_streak == 0) {
+		start_data_instruction(line, listing_stream);
+	}
+	else {
+		//Not using continue_pseudo_instruction, since that function writes a ',' before the operand, which is undesirable for text
+		write_operand(line, listing_stream);
+	}
+
+	data_instruction_streak++;
+
+	//Only write a maximum of 32 data instructions on a single line
+	if (text_instruction_streak >= 32)
+		text_instruction_streak = 0;
+
+	//If the current line has a comment, the line has to end prematurely
+	if (info.has_comment()) {
+		listing_stream << INDENT << ";" << info.get_comment()->text;
+		text_instruction_streak = 0;
+	}
+
+	//End the current line if it is the last instruction of a segment
+	if (info.is_segment_end())
+		text_instruction_streak = 0;
+}
+
 /*
 Writes the output assembly listing to the stream.
 */
@@ -447,21 +495,23 @@ static void write_listing(std::ostream &listing_stream) {
 
 		AssemblyLine line = instructions[i];
 
-		if (line.address == 0xd)
-			info.is_segment_start();
-
-		if (line.instruction->opcode == DATA_BYTE) {		//Write data byte
+		switch(line.instruction->opcode){
+		case DATA_BYTE:		//Write data byte
 			write_data_instruction(line, listing_stream);
-		}
-		else if (line.instruction->opcode == DATA_WORD) {	//Write data word
+			break;
+		case DATA_WORD:		//Write data word
 			write_data_instruction(line, listing_stream);
 			info.advance();
-		}
-		else {
+			break;
+		case DATA_TEXT:		//Write text
+			write_text_instruction(line, listing_stream);
+			break;
+		default: 
 			write_code_line(line, listing_stream);	//Write code
 			for (int j = 0; j < line.instruction->operand_length; j++)
 				info.advance();
 			data_instruction_streak = 0;
+			text_instruction_streak = 0;
 		}
 
 		//Write segment trailer

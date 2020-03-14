@@ -201,6 +201,10 @@ data_type Parser::read_data_type() {
 		return DWORDS_BE_T;
 	case DWORDS_LE:
 		return DWORDS_LE_T;
+	case TEXT:
+		return TEXT_T;
+	case RET:
+		return RET_T;
 	}
 	error("Identifier expected.");
 	return UNDEFINED_T;

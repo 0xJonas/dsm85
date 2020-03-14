@@ -290,6 +290,8 @@ const Instruction instructions8085[] = {
 	Instruction(0xfe,	"CPI ",		ARITHMETIC,	1,	IMMEDIATE),
 	Instruction(0xff,	"RST 7",	BRANCH,		0,	NONE),
 
-	Instruction(DATA_BYTE,	".db ",		DATA,		1,	IMMEDIATE),
-	Instruction(DATA_WORD,	".dw ",		DATA,		2,  IMMEDIATE),
+	Instruction(DATA_BYTE,	".db ",		DATA,	1,	IMMEDIATE),
+	Instruction(DATA_WORD,	".dw ",		DATA,	2,  IMMEDIATE),
+	Instruction(DATA_TEXT,	".text ",	DATA,	1,	CHARACTER),
+	Instruction(DATA_RET,	".rettbl ",	DATA,	2,	ADDRESS),
 };

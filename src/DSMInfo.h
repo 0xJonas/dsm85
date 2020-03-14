@@ -6,7 +6,7 @@
 #include <unordered_map>
 
 enum data_type {
-	UNDEFINED_T, CODE_T, BYTES_T, DWORDS_BE_T, DWORDS_LE_T
+	UNDEFINED_T, CODE_T, BYTES_T, DWORDS_BE_T, DWORDS_LE_T, TEXT_T, RET_T
 };
 
 /*

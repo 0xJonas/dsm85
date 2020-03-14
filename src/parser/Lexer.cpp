@@ -117,6 +117,8 @@ enum states {
 	S_DWORDS,
 	S_DWORDS_BE,
 	S_DWORDS_LE,
+	S_TEXT,
+	S_RET,
 	S_INCLUDE,
 	S_LABELS,
 	S_SEGMENTS,
@@ -135,7 +137,7 @@ enum states {
 		state=S_IDENTIFIER; \
 		return PUSH;
 
-//Defines a state where the corresponding reserved word has been matched up to the b-th character
+//Defines a state where the corresponding reserved word has been matched up to and including the b-th character
 #define MATCHED_UP_TO(a,b) a+b*NUM_STATES
 
 #define PUSH -1
@@ -171,7 +173,9 @@ int Lexer::process_character(char peek) {
 		case 'd': state = MATCHED_UP_TO(S_DWORDS, 0); return PUSH;
 		case 'i': state = MATCHED_UP_TO(S_INCLUDE, 0); return PUSH;
 		case 'l': state = MATCHED_UP_TO(S_LABELS, 0); return PUSH;
+		case 'r': state = MATCHED_UP_TO(S_RET, 0); return PUSH;
 		case 's': state = MATCHED_UP_TO(S_SEGMENTS, 0); return PUSH;
+		case 't': state = MATCHED_UP_TO(S_TEXT, 0); return PUSH;
 		case 'w': state = MATCHED_UP_TO(S_WORDS, 0); return PUSH;
 		case '#': state = MATCHED_UP_TO(S_COMMENT, 0); return SKIP;
 		case -1: state = S_EOI; return PUSH;
@@ -334,6 +338,16 @@ int Lexer::process_character(char peek) {
 	case MATCHED_UP_TO(S_LABELS, 5): MATCH(':')
 	case MATCHED_UP_TO(S_LABELS, 6): return LABELS;
 
+	case MATCHED_UP_TO(S_RET, 0): MATCH('e')
+	case MATCHED_UP_TO(S_RET, 1): MATCH('t')
+	case MATCHED_UP_TO(S_RET, 2):
+		if (is_whitespace(peek))
+			return RET;
+		else {
+			state = S_IDENTIFIER;
+			return PUSH;
+		}
+
 	case MATCHED_UP_TO(S_SEGMENTS, 0): MATCH('e')
 	case MATCHED_UP_TO(S_SEGMENTS, 1): MATCH('g')
 	case MATCHED_UP_TO(S_SEGMENTS, 2): MATCH('m')
@@ -343,6 +357,17 @@ int Lexer::process_character(char peek) {
 	case MATCHED_UP_TO(S_SEGMENTS, 6): MATCH('s')
 	case MATCHED_UP_TO(S_SEGMENTS, 7): MATCH(':')
 	case MATCHED_UP_TO(S_SEGMENTS, 8): return SEGMENTS;
+
+	case MATCHED_UP_TO(S_TEXT, 0): MATCH('e')
+	case MATCHED_UP_TO(S_TEXT, 1): MATCH('x')
+	case MATCHED_UP_TO(S_TEXT, 2): MATCH('t')
+	case MATCHED_UP_TO(S_TEXT, 3):
+		if (is_whitespace(peek))
+			return TEXT;
+		else {
+			state = S_IDENTIFIER;
+			return PUSH;
+		}
 
 	case MATCHED_UP_TO(S_WORDS, 0): MATCH('o')
 	case MATCHED_UP_TO(S_WORDS, 1): MATCH('r')

@@ -5,6 +5,8 @@
 
 #define DATA_BYTE 0x100
 #define DATA_WORD 0x101
+#define DATA_TEXT 0x102
+#define DATA_RET 0x103
 
 enum instruction_type {
 	CONTROL, BRANCH, ARITHMETIC, MOVE, DATA
@@ -12,7 +14,7 @@ enum instruction_type {
 
 //IMMEDIATE HYBRID: Classified as an immediate value but frequently used as an address (eg. LXI instructions)
 enum operand_type {
-	NONE, IMMEDIATE, ADDRESS, IMMEDIATE_HYBRID
+	NONE, IMMEDIATE, ADDRESS, IMMEDIATE_HYBRID, CHARACTER
 };
 
 struct Instruction {
@@ -30,6 +32,6 @@ struct Instruction {
 		operand_type(operand_type) {}
 };
 
-const extern Instruction instructions8085[258];
+const extern Instruction instructions8085[260];
 
 #endif
