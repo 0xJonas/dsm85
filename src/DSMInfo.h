@@ -67,6 +67,13 @@ public:
 	virtual bool range_label() {
 		return false;
 	}
+
+	/*
+	Determine whether an instance is an indirect label
+	*/
+	virtual bool indirect_label() {
+		return false;
+	}
 };
 
 /*
@@ -98,6 +105,34 @@ struct RangeLabel : public Label {
 	Determine whether an instance is a single-address label or a range label.
 	*/
 	virtual bool range_label() {
+		return true;
+	}
+};
+
+struct IndirectLabel : public Label {
+	unsigned int offset;
+
+	IndirectLabel(std::string name, unsigned int address, unsigned int offset, bool jump_label) :
+		Label(name, address, CODE_T, jump_label),
+		offset(offset)
+	{}
+
+	virtual std::string get_jump_target_name(unsigned int address) {
+		return name;
+	}
+
+	virtual std::string get_operand_name(unsigned int address) {
+		return "";
+	}
+
+	int get_offset() {
+		return offset;
+	}
+
+	/*
+	Determine whether an instance is an indirect label
+	*/
+	virtual bool indirect_label() {
 		return true;
 	}
 };
@@ -217,6 +252,11 @@ public:
 	Adds a new single-address label to this DSMInfo. If a label already exists at the given address, it will get overwritten.
 	*/
 	void add_label(std::string name, unsigned int address, data_type type, bool jump_label = true);
+
+	/*
+	Adds an indirect label where the pointer is stored at the given address in the file. 
+	*/
+	void add_indirect_label(std::string name, unsigned int address, unsigned int offset);
 
 	/*
 	Adds a new range label to this DSMInfo. This will override all existing labels inside the given range.

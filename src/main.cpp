@@ -239,8 +239,11 @@ static void single_pass(std::istream &rom_stream) {
 		case RET_T:
 			data = fetch_byte(rom_stream);
 			if (info.get_data_type() == RET_T) {
-				data = (data << 8) | (fetch_byte(rom_stream) & 0xff);
+				data = (fetch_byte(rom_stream) << 8) | (data & 0xff);
 				add_data_instruction(DATA_RET, address, data);
+				IndirectLabel *il = (IndirectLabel *) info.get_label(address);
+				(*label_output)[data] = il->get_jump_target_name(address) + "[" + std::to_string(il->get_offset()) + "]";
+				(*label_output)[il->start_address] = il->get_jump_target_name(address);
 			}
 			else {
 				add_data_instruction(DATA_BYTE, address, data);
@@ -391,15 +394,23 @@ static void start_data_instruction(const AssemblyLine &line, std::ostream &listi
 	listing_stream << line.instruction->mnemonic;
 
 	//Write operand
-	write_operand(line, listing_stream);
+	if (line.instruction->opcode == DATA_RET)	//DATA_RET should always print an address
+		listing_stream << "$" << hex16bit(line.operand);
+	else
+		write_operand(line, listing_stream);
 }
 
 /*
 This function writes a data instruction that is not the first data instruction of the current line.
 */
 static void continue_data_instruction(const AssemblyLine &line, std::ostream &listing_stream) {
-	listing_stream << ",";
-	write_operand(line, listing_stream);
+	if(line.instruction->opcode != DATA_TEXT)
+		listing_stream << ",";
+
+	if(line.instruction->opcode == DATA_RET)
+		listing_stream << "$" << hex16bit(line.operand);
+	else
+		write_operand(line, listing_stream);
 }
 
 /*
@@ -448,41 +459,6 @@ static void write_data_instruction(const AssemblyLine &line, std::ostream &listi
 	prev_opcode = line.instruction->opcode;
 }
 
-static void write_text_instruction(const AssemblyLine &line, std::ostream &listing_stream) {
-	//Start a new line if the current instruction has a label pointing to it
-	if (jump_label_at(line.address))
-		text_instruction_streak = 0;
-
-	//Start a new line if the next instruction is the start of a new segment
-	if (info.is_segment_start())
-		text_instruction_streak = 0;
-
-	//Start a new line or continue an existing one depending on the previous instructions
-	if (data_instruction_streak == 0) {
-		start_data_instruction(line, listing_stream);
-	}
-	else {
-		//Not using continue_pseudo_instruction, since that function writes a ',' before the operand, which is undesirable for text
-		write_operand(line, listing_stream);
-	}
-
-	data_instruction_streak++;
-
-	//Only write a maximum of 32 data instructions on a single line
-	if (text_instruction_streak >= 32)
-		text_instruction_streak = 0;
-
-	//If the current line has a comment, the line has to end prematurely
-	if (info.has_comment()) {
-		listing_stream << INDENT << ";" << info.get_comment()->text;
-		text_instruction_streak = 0;
-	}
-
-	//End the current line if it is the last instruction of a segment
-	if (info.is_segment_end())
-		text_instruction_streak = 0;
-}
-
 /*
 Writes the output assembly listing to the stream.
 */
@@ -504,7 +480,11 @@ static void write_listing(std::ostream &listing_stream) {
 			info.advance();
 			break;
 		case DATA_TEXT:		//Write text
-			write_text_instruction(line, listing_stream);
+			write_data_instruction(line, listing_stream);
+			break;
+		case DATA_RET:
+			write_data_instruction(line, listing_stream);
+			info.advance();
 			break;
 		default: 
 			write_code_line(line, listing_stream);	//Write code

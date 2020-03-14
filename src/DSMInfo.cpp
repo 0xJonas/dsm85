@@ -221,6 +221,14 @@ void DSMInfo::add_label(std::string name, unsigned int address, data_type type, 
 
 }
 
+void DSMInfo::add_indirect_label(std::string name, unsigned int address, unsigned int offset) {
+	//Only add a jump label for the first element of the ret table, similar to ranged labels
+	IndirectLabel *l = new IndirectLabel(name, address, offset >> 1, offset == 0);
+
+	label_refs.push_back(l);
+	labels[address + offset] = l;
+}
+
 void DSMInfo::add_range_label(std::string name, unsigned int start_address, unsigned int end_address, data_type type, bool jump_label) {
 	RangeLabel *rl = new RangeLabel(name, start_address, end_address, type, jump_label);
 	RangeLabel *rl_head = new RangeLabel(name, start_address, end_address, type, true);
@@ -230,9 +238,16 @@ void DSMInfo::add_range_label(std::string name, unsigned int start_address, unsi
 	//Separate label for the first element, since it signifies the start of the range
 	labels[start_address] = rl_head;
 
-	//Add pointer to the new label for every byte in the range.
-	for (unsigned int i = start_address + 1; i <= end_address; i++) {
-		labels[i] = rl;
+	if (type == RET_T) {
+		for (unsigned int i = 0; i <= end_address - start_address; i += 2) {
+			add_indirect_label(name, start_address, i);
+		}
+	}
+	else {
+		//Add pointer to the new label for every byte in the range.
+		for (unsigned int i = start_address + 1; i <= end_address; i++) {
+			labels[i] = rl;
+		}
 	}
 	set_data_type(start_address, end_address + 1, type);
 }
