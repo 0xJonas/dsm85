@@ -8,6 +8,34 @@
 #include "Lexer.h"
 #include "../DSMInfo.h"
 
+/*
+Label file grammar:
+
+<file>    ::= (<section>)*
+<section> ::= 'include:' newline <include-section>
+		    | 'segments:' newline <segments-section>
+		    | 'labels:' newline <labels-section>
+		    | 'comments:' newline <comments-setction>
+
+<include-section>  ::= (string newline)*
+<segments-section> ::= (<label-target> <data-type>? identifier newline)*
+<labels-section>   ::= (<label-target> <data-type>? identifier newline)*
+<comments-section> ::= (<address-expr string newline)*
+
+<label-target> ::= <address-expr>
+				 | <address-expr> '..' <address-expr>
+			     | <address-expr> '(' <address-expr> ')'
+
+<data-type> ::= 'code' | 'bytes' | 'words' | 'dwords' | 'dwords_le' | 'dwords_be' | 'text' | 'ret'
+
+<address-expr>    ::= <address-product> (('+' | '-') <address-product>)*
+<address-product> ::= <single-address> (('*' | '/' | '%') <single-address>)*
+<single-address>  ::= '-' <address-expr>
+				    | '(' <address-expr> ')'
+				    | literal
+				    | identifier
+*/
+
 class parse_error : public std::exception {
 
 public:

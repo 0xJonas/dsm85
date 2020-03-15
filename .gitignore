@@ -8,3 +8,4 @@ x64/
 *.bin
 *.COM
 /test_labels.txt
+/example_labels.txt

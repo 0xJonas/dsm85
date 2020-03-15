@@ -63,8 +63,6 @@ unsigned int current_address = 0;
 
 unsigned int data_instruction_streak = 0;
 
-unsigned int text_instruction_streak = 0;
-
 /*
 ================================
            READ INPUT
@@ -442,8 +440,8 @@ static void write_data_instruction(const AssemblyLine &line, std::ostream &listi
 
 	data_instruction_streak++;
 
-	//Only write a maximum of 8 data instructions on a single line
-	if (data_instruction_streak >= 8)
+	//Only write a maximum of 8 data instructions on a single line, unless its text in which case we never stop
+	if (data_instruction_streak >= 8 && line.instruction->opcode != DATA_TEXT)
 		data_instruction_streak = 0;
 
 	//If the current line has a comment, the line has to end prematurely
@@ -491,7 +489,6 @@ static void write_listing(std::ostream &listing_stream) {
 			for (int j = 0; j < line.instruction->operand_length; j++)
 				info.advance();
 			data_instruction_streak = 0;
-			text_instruction_streak = 0;
 		}
 
 		//Write segment trailer

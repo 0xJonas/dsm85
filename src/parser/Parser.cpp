@@ -166,8 +166,8 @@ void Parser::comments_section() {
 }
 
 std::pair<unsigned int,unsigned int> Parser::label_target() {
-	unsigned int start = address_expr();
-	unsigned int end = start;
+	int start = address_expr();
+	int end = start;
 
 	if (peek.token_type == RANGE) {
 		consume();
@@ -175,8 +175,12 @@ std::pair<unsigned int,unsigned int> Parser::label_target() {
 	}
 	else if (peek.token_type == LEFT_PARENTHESES) {
 		consume();
-		end = start + address_expr() - 1;
-		match(RIGHT_PARENTHESES, "Unbalances parentheses.");
+		int length = address_expr();
+		if (length < 0)
+			error("Range length is negative.");
+
+		end = start + length - 1;
+		match(RIGHT_PARENTHESES, "Unbalanced parentheses.");
 	}
 
 	if (end < start) {
@@ -185,7 +189,16 @@ std::pair<unsigned int,unsigned int> Parser::label_target() {
 		end = temp;
 	}
 
-	return std::pair<unsigned int, unsigned int>(start, end);
+	if (start < 0) {
+		if (start == end)
+			error("Address is negative.");
+		else
+			error("Start address is negative.");
+	}
+	else if (end < 0)
+		error("End address is negative.");
+
+	return std::pair<unsigned int, unsigned int>((unsigned int) start, (unsigned int) end);
 }
 
 data_type Parser::read_data_type() {
@@ -211,7 +224,6 @@ data_type Parser::read_data_type() {
 }
 
 int Parser::address_expr() {
-	//Todo Unary plus/minus
 	int sum = address_product();
 	do {
 		switch (peek.token_type) {
@@ -262,9 +274,12 @@ int Parser::single_address() {
 	std::string lexem = peek.lexem;
 	int val = 0;
 	switch (consume().token_type) {
+	case SUBTRACT:
+		val = -address_expr();
+		return val;
 	case LEFT_PARENTHESES:
 		val = address_expr();
-		match(RIGHT_PARENTHESES, "Unbalances parentheses.");
+		match(RIGHT_PARENTHESES, "Unbalanced parentheses.");
 		return val;
 	case LITERAL:
 		try {
