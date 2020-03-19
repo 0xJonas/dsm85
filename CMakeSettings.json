@@ -1,0 +1,183 @@
+﻿{
+  "configurations": [
+    {
+      "name": "x86-Debug",
+      "generator": "Ninja",
+      "configurationType": "Debug",
+      "inheritEnvironments": [
+        "msvc_x86"
+      ],
+      "buildRoot": "${workspaceRoot}\\build\\${name}",
+      "installRoot": "${workspaceRoot}\\install\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "-v",
+      "ctestCommandArgs": ""
+    },
+    //-----------------------------------------------------
+    {
+      "name": "x64-Debug",
+      "generator": "Ninja",
+      "configurationType": "Debug",
+      "inheritEnvironments": [
+        "msvc_x64"
+      ],
+      "buildRoot": "${workspaceRoot}\\build\\${name}",
+      "installRoot": "${workspaceRoot}\\install\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "-v",
+      "ctestCommandArgs": ""
+    },
+    //-----------------------------------------------------
+    {
+      "name": "x86-Release",
+      "generator": "Ninja",
+      "configurationType": "Release",
+      "inheritEnvironments": [
+        "msvc_x86"
+      ],
+      "buildRoot": "${workspaceRoot}\\build\\${name}",
+      "installRoot": "${workspaceRoot}\\install\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "-v",
+      "ctestCommandArgs": ""
+    },
+    //-----------------------------------------------------
+    {
+      "name": "x64-Release",
+      "generator": "Ninja",
+      "configurationType": "Release",
+      "inheritEnvironments": [
+        "msvc_x64"
+      ],
+      "buildRoot": "${workspaceRoot}\\build\\${name}",
+      "installRoot": "${workspaceRoot}\\install\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "-v",
+      "ctestCommandArgs": ""
+    },
+    //-----------------------------------------------------
+    {
+      "name": "linux-x64-Debug",
+      "generator": "Unix Makefiles",
+      "configurationType": "Debug",
+      "inheritEnvironments": [
+        "linux_x64"
+      ],
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "-v",
+      "ctestCommandArgs": "",
+      "remoteMachineName": "${defaultRemoteMachineName}",
+      "cmakeExecutable": "/usr/bin/cmake",
+      "remoteCMakeListsRoot": "$HOME/quickP/dsm85",
+      "remoteBuildRoot": "$HOME/quickP/dsm85/build/${name}",
+      "remoteInstallRoot": "$HOME/quickP/dsm85/install/${name}",
+      "remoteCopySourcesExclusionList": [ "Debug", "build", "install" ],
+      "remoteCopySources": true,
+      "variables": [
+        {
+          "name": "CMAKE_CXX_COMPILER",
+          "value": "g++",
+          "type": "FILEPATH"
+        },
+        {
+          "name": "CMAKE_C_COMPILER",
+          "value": "gcc",
+          "type": "FILEPATH"
+        }
+      ]
+    },
+    //-----------------------------------------------------
+    {
+      "name": "linux-x86-Debug",
+      "generator": "Unix Makefiles",
+      "configurationType": "Debug",
+      "inheritEnvironments": [
+        "linux_x86"
+      ],
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "-v",
+      "ctestCommandArgs": "",
+      "remoteMachineName": "${defaultRemoteMachineName}",
+      "cmakeExecutable": "/usr/bin/cmake",
+      "remoteCMakeListsRoot": "$HOME/quickP/dsm85",
+      "remoteBuildRoot": "$HOME/quickP/dsm85/build/${name}",
+      "remoteInstallRoot": "$HOME/quickP/dsm85/install/${name}",
+      "remoteCopySourcesExclusionList": [ "Debug", "build", "install" ],
+      "remoteCopySources": true,
+      "variables": [
+        {
+          "name": "CMAKE_CXX_COMPILER",
+          "value": "g++",
+          "type": "FILEPATH"
+        },
+        {
+          "name": "CMAKE_C_COMPILER",
+          "value": "gcc",
+          "type": "FILEPATH"
+        }
+      ]
+    },
+    //-----------------------------------------------------
+    {
+      "name": "linux-x64-Release",
+      "generator": "Unix Makefiles",
+      "configurationType": "Release",
+      "inheritEnvironments": [
+        "linux_x64"
+      ],
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "-v",
+      "ctestCommandArgs": "",
+      "remoteMachineName": "${defaultRemoteMachineName}",
+      "cmakeExecutable": "/usr/bin/cmake",
+      "remoteCMakeListsRoot": "$HOME/quickP/dsm85",
+      "remoteBuildRoot": "$HOME/quickP/dsm85/build/${name}",
+      "remoteInstallRoot": "$HOME/quickP/dsm85/install/${name}",
+      "remoteCopySourcesExclusionList": [ "Debug", "build", "install" ],
+      "remoteCopySources": true,
+      "variables": [
+        {
+          "name": "CMAKE_CXX_COMPILER",
+          "value": "g++",
+          "type": "FILEPATH"
+        },
+        {
+          "name": "CMAKE_C_COMPILER",
+          "value": "gcc",
+          "type": "FILEPATH"
+        }
+      ]
+    },
+    //-----------------------------------------------------
+    {
+      "name": "linux-x86-Release",
+      "generator": "Unix Makefiles",
+      "configurationType": "Release",
+      "inheritEnvironments": [
+        "linux_x86"
+      ],
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "-v",
+      "ctestCommandArgs": "",
+      "remoteMachineName": "${defaultRemoteMachineName}",
+      "cmakeExecutable": "/usr/bin/cmake",
+      "remoteCMakeListsRoot": "$HOME/quickP/dsm85",
+      "remoteBuildRoot": "$HOME/quickP/dsm85/build/${name}",
+      "remoteInstallRoot": "$HOME/quickP/dsm85/install/${name}",
+      "remoteCopySourcesExclusionList": [ "Debug", "build", "install" ],
+      "remoteCopySources": true,
+      "variables": [
+        {
+          "name": "CMAKE_CXX_COMPILER",
+          "value": "g++",
+          "type": "FILEPATH"
+        },
+        {
+          "name": "CMAKE_C_COMPILER",
+          "value": "gcc",
+          "type": "FILEPATH"
+        }
+      ]
+    }
+  ]
+}

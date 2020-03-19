@@ -1,6 +1,8 @@
 #include "ArgumentParser.h"
 #include <stdexcept>
 #include <utility>
+#include <iostream>
+#include <ostream>
 
 #define CONSOLE_WIDTH 120
 #define ARGUMENT_INDENT "    "
