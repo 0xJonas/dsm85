@@ -9,7 +9,7 @@
       ],
       "buildRoot": "${workspaceRoot}\\build\\${name}",
       "installRoot": "${workspaceRoot}\\install\\${name}",
-      "cmakeCommandArgs": "",
+      "cmakeCommandArgs": "-D DEBUG=1",
       "buildCommandArgs": "-v",
       "ctestCommandArgs": ""
     },
@@ -23,7 +23,7 @@
       ],
       "buildRoot": "${workspaceRoot}\\build\\${name}",
       "installRoot": "${workspaceRoot}\\install\\${name}",
-      "cmakeCommandArgs": "",
+      "cmakeCommandArgs": "-D DEBUG=1",
       "buildCommandArgs": "-v",
       "ctestCommandArgs": ""
     },
@@ -63,7 +63,7 @@
       "inheritEnvironments": [
         "linux_x64"
       ],
-      "cmakeCommandArgs": "",
+      "cmakeCommandArgs": "-D DEBUG=1",
       "buildCommandArgs": "-v",
       "ctestCommandArgs": "",
       "remoteMachineName": "${defaultRemoteMachineName}",
@@ -94,7 +94,7 @@
       "inheritEnvironments": [
         "linux_x86"
       ],
-      "cmakeCommandArgs": "",
+      "cmakeCommandArgs": "-D DEBUG=1",
       "buildCommandArgs": "-v",
       "ctestCommandArgs": "",
       "remoteMachineName": "${defaultRemoteMachineName}",

@@ -21,3 +21,20 @@ configure_file(src/config_template.h config.h)
 
 add_executable(dsm85 ${source_files})
 target_include_directories(dsm85 PUBLIC ${PROJECT_BINARY_DIR})
+
+# remove default /W3 warning level from MSVC compiler flags
+string(REGEX REPLACE "/W[0-4]" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+
+if(DEBUG)
+	if(MSVC)
+		target_compile_options(dsm85 PRIVATE /W4 /Od)
+	else()
+		target_compile_options(dsm85 PRIVATE -Wall -Og)
+	endif()
+else()
+	if(MSVC)
+		target_compile_options(dsm85 PRIVATE /W4 /WX)
+	else()
+		target_compile_options(dsm85 PRIVATE -Wall -Werror)
+	endif()
+endif()
