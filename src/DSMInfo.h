@@ -51,6 +51,7 @@ public:
 	Returns the name that gets used in a jump target context.
 	*/
 	virtual std::string get_jump_target_name(unsigned int address) {
+		(void)address;
 		return name;
 	}
 
@@ -58,6 +59,7 @@ public:
 	Returns the name that gets used in an operand context.
 	*/
 	virtual std::string get_operand_name(unsigned int address) {
+		(void)address;
 		return name;
 	}
 
@@ -118,10 +120,12 @@ struct IndirectLabel : public Label {
 	{}
 
 	virtual std::string get_jump_target_name(unsigned int address) {
+		(void)address;
 		return name;
 	}
 
 	virtual std::string get_operand_name(unsigned int address) {
+		(void)address;
 		return "";
 	}
 

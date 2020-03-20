@@ -143,7 +143,7 @@ enum states {
 #define PUSH -1
 #define SKIP -2
 
-int Lexer::process_character(char peek) {
+int Lexer::process_character() {
 	switch (state) {
 	case S_START:
 		if (is_whitespace(peek))
@@ -391,18 +391,18 @@ Token Lexer::next_token() {
 	state = S_START;
 	lexem_length = 0;
 
-	int token_type = process_character(peek);
+	int token_type = process_character();
 	while (true) {
 		if (token_type == PUSH) {
 			lexem_buffer[lexem_length++] = peek;
 			if (lexem_length >= capacity)
 				increase_capacity(capacity + 128);
-			peek = in.get();
-			token_type = process_character(peek);
+			peek = (char)in.get();
+			token_type = process_character();
 		}
 		else if (token_type == SKIP) {
-			peek = in.get();
-			token_type = process_character(peek);
+			peek = (char)in.get();
+			token_type = process_character();
 		}
 		else {
 			if (token_type == NEWLINE)
@@ -421,5 +421,5 @@ void Lexer::reset() {
 	line = 1;
 	in.clear();
 	in.seekg(0);
-	peek = in.get();
+	peek = (char)in.get();
 }

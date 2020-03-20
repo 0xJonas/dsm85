@@ -28,12 +28,12 @@ class Lexer {
 	int state;
 	char peek;
 	char *lexem_buffer;
-	int lexem_length;
+	size_t lexem_length;
 	size_t capacity;
 
 	void increase_capacity(size_t new_capacity);
 
-	int process_character(char peek);
+	int process_character();
 public:
 	Lexer(std::istream &in, size_t initial_capacity=128);
 	~Lexer();
