@@ -17,10 +17,7 @@ set(source_files
 	src/parser/Lexer.cpp
 	src/parser/Parser.cpp)
 
-configure_file(src/config_template.h config.h)
-
 add_executable(dsm85 ${source_files})
-target_include_directories(dsm85 PUBLIC ${PROJECT_BINARY_DIR})
 
 # remove default /W3 warning level from MSVC compiler flags
 string(REGEX REPLACE "/W[0-4]" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")

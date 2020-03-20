@@ -7,12 +7,14 @@
 #include <unordered_map>
 #include <utility>
 
-#include "config.h"
 #include "Instructions.h"
 #include "ArgumentParser.h"
 #include "util.h"
 #include "parser/Parser.h"
 #include "DSMInfo.h"
+
+#define VERSION_MAJOR 1
+#define VERSION_MINOR 0
 
 #define MAX_ADDRESS 0xffff
 

@@ -24,7 +24,7 @@ void Lexer::increase_capacity(size_t new_capacity) {
 		return;
 
 	char *new_buffer = new char[new_capacity];
-	for (int i = 0; i < lexem_length; i++) {
+	for (unsigned int i = 0; i < lexem_length; i++) {
 		new_buffer[i] = lexem_buffer[i];
 	}
 	delete[] lexem_buffer;
