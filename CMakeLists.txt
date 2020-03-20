@@ -25,7 +25,7 @@ target_include_directories(dsm85 PUBLIC ${PROJECT_BINARY_DIR})
 # remove default /W3 warning level from MSVC compiler flags
 string(REGEX REPLACE "/W[0-4]" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
-if(DEBUG)
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 	if(MSVC)
 		target_compile_options(dsm85 PRIVATE /W4 /Od)
 	else()
@@ -37,4 +37,8 @@ else()
 	else()
 		target_compile_options(dsm85 PRIVATE -Wall -Werror)
 	endif()
+endif()
+
+if(X86 AND NOT MSVC)
+	target_compile_options(dsm85 PRIVATE -m32)
 endif()
