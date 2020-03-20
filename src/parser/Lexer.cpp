@@ -84,9 +84,9 @@ static bool is_valid_literal_body(char c) {
 	case 'X':
 		return true;
 	}
-	return c >= '0' && c <= '9'
-		|| c >= 'a' && c <= 'f'
-		|| c >= 'A' && c <= 'F';
+	return (c >= '0' && c <= '9')
+		|| (c >= 'a' && c <= 'f')
+		|| (c >= 'A' && c <= 'F');
 }
 
 enum states {

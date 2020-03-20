@@ -47,6 +47,8 @@ public:
 		jump_label(jump_label)
 	{}
 
+	virtual ~Label() = default;
+
 	/*
 	Returns the name that gets used in a jump target context.
 	*/

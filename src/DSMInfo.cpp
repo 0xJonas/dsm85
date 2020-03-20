@@ -181,7 +181,7 @@ void DSMInfo::add_segment(std::string name, data_type data_type, unsigned int st
 
 	//check if segment overlaps with existing segments
 	if (start_index != end_index
-		|| start_index > 0 && segments[start_index - 1]->end_address >= start_address)
+		|| (start_index > 0 && segments[start_index - 1]->end_address >= start_address))
 		throw std::invalid_argument("Segments can not overlap");
 
 	Segment *s = new Segment(name, data_type, start_address, end_address);

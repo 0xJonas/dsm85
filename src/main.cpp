@@ -247,6 +247,9 @@ static void single_pass(std::istream &rom_stream) {
 				add_data_instruction(DATA_BYTE, address, data);
 			}
 			break;
+		default:
+			//Should never happen
+			std::cerr << "Error: info.get_data_type() returned undefined type (UNDEFINED_T)" << std::endl;
 		}
 	}
 }

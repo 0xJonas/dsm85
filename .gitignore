@@ -12,3 +12,4 @@ install
 *.COM
 /test_labels.txt
 /example_labels.txt
+/releases

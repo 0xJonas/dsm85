@@ -99,10 +99,10 @@ class Parser {
 	void skip_blank_lines();
 
 	Parser(std::istream &in, std::string source, SymbolTable &symbol_table, DSMInfo &info)
-		: lexer(Lexer(in)),
-		  source(source),
-		  symbol_table(symbol_table),
-		  info(info)
+		: source(source),
+		  info(info),
+		  lexer(Lexer(in)),
+		  symbol_table(symbol_table)
 	{
 		peek = lexer.next_token();
 	}
