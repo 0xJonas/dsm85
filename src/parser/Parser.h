@@ -39,7 +39,7 @@ Label file grammar:
 class parse_error : public std::exception {
 
 public:
-	virtual char *what() {
+   const char * what() const noexcept override {
 		return (char *) "Parsing error!";
 	}
 };
