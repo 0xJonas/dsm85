@@ -103,8 +103,8 @@ void Parser::include_section() {
 }
 
 void Parser::segments_section() {
-	while (peek.token_type == LITERAL 
-		|| peek.token_type == LEFT_PARENTHESES 
+	while (peek.token_type == LITERAL
+		|| peek.token_type == LEFT_PARENTHESES
 		|| peek.token_type == IDENTIFIER)
 	{
 		std::pair<unsigned int,unsigned int> target = label_target();
@@ -285,7 +285,7 @@ int Parser::single_address() {
 		try {
 			return parse_int_literal(lexem);
 		}
-		catch (std::invalid_argument) {
+		catch (std::invalid_argument &) {
 			error("Invalid integer literal: " + lexem);
 			return 0;
 		}
@@ -293,7 +293,7 @@ int Parser::single_address() {
 		try {
 			return symbol_table.get_symbol_value(lexem);
 		}
-		catch (std::invalid_argument) {
+		catch (std::invalid_argument &) {
 			error("Cannot find symbol: " + lexem);
 			return 0;
 		}

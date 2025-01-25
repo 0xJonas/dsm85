@@ -133,9 +133,10 @@ enum states {
 		state+=NUM_STATES; \
 	else if(is_whitespace(peek)) \
 		return IDENTIFIER; \
-	else \
+	else { \
 		state=S_IDENTIFIER; \
-		return PUSH;
+		return PUSH; \
+	}
 
 //Defines a state where the corresponding reserved word has been matched up to and including the b-th character
 #define MATCHED_UP_TO(a,b) a+b*NUM_STATES
@@ -373,7 +374,7 @@ int Lexer::process_character() {
 	case MATCHED_UP_TO(S_WORDS, 1): MATCH('r')
 	case MATCHED_UP_TO(S_WORDS, 2): MATCH('d')
 	case MATCHED_UP_TO(S_WORDS, 3): MATCH('s')
-	case MATCHED_UP_TO(S_WORDS, 4): 
+	case MATCHED_UP_TO(S_WORDS, 4):
 		if(is_whitespace(peek))
 			return WORDS;
 		else {
@@ -381,7 +382,7 @@ int Lexer::process_character() {
 			return PUSH;
 		}
 	}
-	
+
 	//Error
 	state = S_START;
 	return PUSH;

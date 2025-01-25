@@ -82,7 +82,7 @@ static bool jump_label_at(unsigned int address) {
 Creates a new label to the target address if the given AssemblyLine is BRANCH type instruction.
 */
 static void create_label_if_needed(const AssemblyLine &line) {
-	if (line.instruction->instruction_type == BRANCH 
+	if (line.instruction->instruction_type == BRANCH
 		&& line.instruction->operand_length > 0
 		&& label_output->find(line.operand) == label_output->end())
 	{
@@ -112,7 +112,7 @@ static bool can_read_as_operand(unsigned int address) {
 }
 
 /*
-Adds a pseudo-instruction. 
+Adds a pseudo-instruction.
 */
 static void add_data_instruction(int instruction, int address, int data) {
 	AssemblyLine pseudo(address, &(instructions8085[instruction]), data);
@@ -167,7 +167,7 @@ static void read_code_instruction(std::istream &rom_stream) {
 
 		//Read second operand byte
 		if (!can_read_as_operand(current_address) || segment_end) {
-			//Output two incomplete instructions 
+			//Output two incomplete instructions
 			add_data_instruction(DATA_BYTE, address, opcode);
 			add_data_instruction(DATA_BYTE, address + 1, opcode);
 			return;
@@ -266,7 +266,7 @@ Writes the operand of an AssemblyLine. If the operand is an address for which a 
 static void write_operand(const AssemblyLine &line, std::ostream &listing_stream) {
 	Label *label = nullptr;
 	switch (line.instruction->operand_type) {
-	case ADDRESS: 
+	case ADDRESS:
 		label = info.get_label(line.operand);
 		if (label)	//Print label
 			listing_stream << label->get_operand_name(line.operand);
@@ -415,7 +415,7 @@ static void continue_data_instruction(const AssemblyLine &line, std::ostream &li
 }
 
 /*
-Writes a data instruction to the output stream. Data instructions are handled differently from code instructions, in 
+Writes a data instruction to the output stream. Data instructions are handled differently from code instructions, in
 that successive data instructions are merged together. This function transparently takes care of that.
 */
 static void write_data_instruction(const AssemblyLine &line, std::ostream &listing_stream) {
@@ -487,7 +487,7 @@ static void write_listing(std::ostream &listing_stream) {
 			write_data_instruction(line, listing_stream);
 			info.advance();
 			break;
-		default: 
+		default:
 			write_code_line(line, listing_stream);	//Write code
 			for (int j = 0; j < line.instruction->operand_length; j++)
 				info.advance();
@@ -550,7 +550,7 @@ static inline bool set_int_argument(unsigned int &arg, std::string value) {
 		arg = parse_int_literal(value);
 		return true;
 	}
-	catch (std::invalid_argument) {
+	catch (std::invalid_argument &) {
 		return false;
 	}
 }
@@ -615,9 +615,9 @@ int main(int argc, char *argv[]) {
 
 	//Read arguments
 	bool successfully_parsed = parser.parse(argc, argv);
-	
+
 	//Print help & exit if something went wrong or -h was used.
-	if (argc <= 1 
+	if (argc <= 1
 		|| print_help
 		|| !successfully_parsed
 		|| parser.files.size()!=1) {
@@ -633,7 +633,7 @@ int main(int argc, char *argv[]) {
 		base_address = start_address;
 	if (end_address == MAX_ADDRESS && input_length != MAX_ADDRESS)
 		end_address = start_address + input_length - 1;
-	
+
 	//Create input & output streams
 	std::string input_file = parser.files[0];
 	std::ifstream rom_stream(input_file,std::ios_base::in | std::ios_base::binary);
@@ -664,7 +664,7 @@ int main(int argc, char *argv[]) {
 		try {
 			Parser::parse(labels_stream, labels_file, info);
 		}
-		catch (parse_error) {
+		catch (parse_error &) {
 			return ERROR_BAD_LABEL_FILE;
 		}
 
